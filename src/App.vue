@@ -5,8 +5,8 @@ import HelloWorld from './components/HelloWorld.vue'
 </script>
 
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <HelloWorld msg="Hello Vue 3 + Vite" />
+  <img alt="YouTube logo" src="./assets/logo.png" />
+  <HelloWorld msg="Open a YouTube Video to enable this plugin" />
 </template>
 
 <style>
