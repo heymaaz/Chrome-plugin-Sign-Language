@@ -49,7 +49,8 @@ import { ref, onMounted } from 'vue'
 export default {
   data() {
     return {
-      currentTabUrl: ''
+      currentTabUrl: '',
+      videoID: ''
     }
   },
   methods: {
@@ -65,7 +66,9 @@ export default {
       }
 
       // Send a message to your background script
-      chrome.runtime.sendMessage({action: "injectSignLanguage"});
+      
+      chrome.runtime.sendMessage({action: "injectSignLanguage", videoID: this.videoID});
+      //chrome.runtime.sendMessage({action: "injectSignLanguage"});
 
       /*
       // Send a message to your background script to initiate sign language injection
@@ -80,12 +83,15 @@ export default {
   computed: {
     onYoutube: function() {
       if (! this.currentTabUrl) {
+        this.videoID = '';
         return false;
       }
       if (this.currentTabUrl.includes("youtube.com/watch?v")) {
+        this.videoID = this.currentTabUrl.split("v=")[1];
         return true;
       }
       //return "You are not on Youtube!: "+this.currentTabUrl;
+      this.videoID='';
       return false;
     }
   },

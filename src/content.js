@@ -1,61 +1,16 @@
 console.log("Content script for YouTube BSL Interpreter extension is running.");
 
-// Function to inject the video
-function injectSignLanguageVideo() {
-    const video = document.createElement('video');
-    video.src = 'https://www.w3schools.com/html/mov_bbb.mp4';
-    video.controls = true;
-    video.autoplay = true;
-    video.width = 640;
-    video.height = 360;
 
-    const secondaryInner = document.getElementById('secondary-inner');
-    if (secondaryInner) {
-        secondaryInner.insertBefore(video, secondaryInner.firstChild);
-    } else {
-        console.error('Could not find the insertion point for the video.');
-    }
-}
 // Synchronize play/pause with YouTube player function
-function setupPlayPauseSynchronization(bslVideo) {
-    document.addEventListener('click', event => {
-        let element = event.target;
-        while (element && !element.matches('.ytp-play-button')) {
-            element = element.parentElement;
-        }
-
-        if (element) {
-            // Use requestAnimationFrame to delay the synchronization after YouTube updates
-            requestAnimationFrame(() => {
-                // Re-check the state after the frame refreshes to ensure accuracy
-                requestAnimationFrame(() => {
-                    const isYouTubePlaying = element.getAttribute('aria-label').includes('Pause');
-                    if (isYouTubePlaying) {
-                        if (bslVideo.paused) {
-                            bslVideo.play();
-                        }
-                    } else {
-                        if (!bslVideo.paused) {
-                            bslVideo.pause();
-                        }
-                    }
-                });
-            });
-        }
-    });
-}
-
 function continuousSynchronization(bslVideo) {
     let lastState = null; // Store the last known state
 
     const checkState = () => {
-        // Assuming the YouTube player is embedded in an iframe or is otherwise accessible,
-        // you might need to find the specific element representing the YouTube player
-        // Here we are making a broad assumption on how to find this. You might need to adjust.
+        // Find the YouTube video player
         const ytPlayer = document.querySelector('.html5-main-video');
 
         if (ytPlayer) {
-            const isPlaying = !ytPlayer.paused;
+            const isPlaying = !ytPlayer.paused;// Check if the video is playing
 
             // Check if the state has changed since last check
             if (isPlaying !== lastState) {
@@ -69,7 +24,7 @@ function continuousSynchronization(bslVideo) {
         }
     };
 
-    // Check every 500 milliseconds. You can adjust the interval as needed.
+    // Check every 500 milliseconds. if the state has changed
     setInterval(checkState, 500);
 }
 
@@ -116,7 +71,6 @@ function injectMultipleSignLanguageVideos() {
         playNextVideo(); // Start playing the first video immediately after insertion
         
         let bslVideo = document.getElementById('bslVideo'); 
-        //setupPlayPauseSynchronization(bslVideo);
         continuousSynchronization(bslVideo);
     } else {
         console.error('Could not find the insertion point for the video.');
@@ -127,7 +81,7 @@ function injectMultipleSignLanguageVideos() {
 // Listen for the message from the background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "injectSignLanguage") {
-        //injectSignLanguageVideo();
         injectMultipleSignLanguageVideos(); // Call the new function to inject the video player
+        console.log("Injected sign language player for video with ID: " + request.videoID);
     }
 });
