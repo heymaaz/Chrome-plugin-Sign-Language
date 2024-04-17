@@ -1341,20 +1341,41 @@ const signVideosDictionary = {
     "hotel": "https://media.signbsl.com/videos/bsl/signstation/hotel.mp4",
     "luggage": "https://media.signbsl.com/videos/bsl/signstation/luggage.mp4",
     "station": "https://media.signbsl.com/videos/bsl/signstation/station.mp4",
-    "joining": "https://media.signbsl.com/videos/bsl/signstation/connection.mp4"
+    "joining": "https://media.signbsl.com/videos/bsl/signstation/connection.mp4",
+    "hello": "https://media.signbsl.com/videos/bsl/signstation/hello.mp4",
+    "idea": "https://media.signbsl.com/videos/bsl/signstation/idea.mp4",
+    "plastic": "https://media.signbsl.com/videos/bsl/signstation/plastic.mp4",
+    "please": "https://media.signbsl.com/videos/bsl/signstation/please.mp4",
+    "blow": "https://media.signbsl.com/videos/bsl/signstation/blow.mp4",
+    "hose": "https://media.signbsl.com/videos/bsl/signstation/hose.mp4",
+    "clamp": "https://media.signbsl.com/videos/bsl/signstation/clamp.mp4",
+    "project": "https://media.signbsl.com/videos/bsl/signstation/project.mp4",
+    "challenge": "https://media.signbsl.com/videos/bsl/signstation/challenge.mp4",
+    "paperclip": "https://media.signbsl.com/videos/bsl/signstation/paperclip.mp4",
+    "subscribe": "https://media.signbsl.com/videos/ict/mp4/672_subscribe.mp4",
+    "click": "https://media.signbsl.com/videos/ict/mp4/92_click.mp4",
+    "button": "https://media.signbsl.com/videos/bsl/signstation/button.mp4",
+    "pliers": "https://media.signbsl.com/videos/bsl/signstation/pliers.mp4",
+    "tape": "https://media.signbsl.com/videos/bsl/signstation/tape.mp4",
+    "thankyou": "https://media.signbsl.com/videos/bsl/signstation/thank-you.mp4",
+    "fine": "https://media.signbsl.com/videos/bsl/signstation/fine.mp4",
+    "software": "https://media.signbsl.com/videos/bsl/signstation/software.mp4",
+    "engineer": "https://media.signbsl.com/videos/bsl/BenFletcherTechSigns/mp4/engineer.mp4"
 };
 
 // Synchronize play/pause with YouTube player function
 function continuousSynchronization(bslVideo) {
     let lastState = null; // Store the last known state
-
+    
     const checkState = () => {
         // Find the YouTube video player
         const ytPlayer = document.querySelector('.html5-main-video');
-
+        
         if (ytPlayer) {
             const isPlaying = !ytPlayer.paused;// Check if the video is playing
-
+            //Log the time of the video
+            console.log(ytPlayer.currentTime);
+            
             // Check if the state has changed since last check
             if (isPlaying !== lastState) {
                 if (isPlaying) {
@@ -1366,7 +1387,7 @@ function continuousSynchronization(bslVideo) {
             }
         }
     };
-
+    
     // Check every 500 milliseconds. if the state has changed
     setInterval(checkState, 500);
 }
@@ -1383,8 +1404,40 @@ function injectMultipleSignLanguageVideos() {
         "https://media.signbsl.com/videos/bsl/signstation/science.mp4"
         // Add more video URLs here
     ];
+    
+    
+    //Fetch the videos from the server
+    // fetch the data from the server
+    // Example payload:
+    /*
+    {
+        "00:00:00.000": "FIVE TECHNOLOGY MYTHS WRONG MORE SIGNAL BARS",
+        "00:00:02.940": "MORE BARS BETTER SERVICE",
+        "00:00:04.920": "PHONE SHOW HOW CLOSE",
+        "00:00:06.600": "CELL-TOWER NEAR NOT",
+        "00:00:08.580": "SPEED FULL SIGNAL STILL FEEL SLOW",
+        "00:00:10.740": "IF NETWORK BUSY AIRPLANE MODE",
+        "00:00:12.660": "CHARGE PHONE FAST TECHNICALLY"
+    }
+    */
+    //let videoSources = [];
+    let videoID = window.location.href.split('v=')[1];
+    fetch('http://127.0.0.1:5000/url/'+videoID)
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        
+        for (const [key, value] of Object.entries(data)) {
+            //videoSources.push(value);
+            console.log(`${key}: ${value}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+    
     let currentVideoIndex = 0; // Index to track the current video
-
+    
     // Create video element
     const videoElement = document.createElement('video');
     videoElement.id = 'bslVideo';
@@ -1393,7 +1446,7 @@ function injectMultipleSignLanguageVideos() {
     videoElement.autoplay = true;
     videoElement.width = 640;
     videoElement.height = 360;
-
+    
     // Function to play the next video
     function playNextVideo() {
         if (currentVideoIndex < videoSources.length) {
@@ -1402,11 +1455,15 @@ function injectMultipleSignLanguageVideos() {
             currentVideoIndex++;
         } else {
             console.log('All videos played.');
+            //https://www.youtube.com/watch?v=THw-wXt7wyM
+            //video id: THw-wXt7wyM
+            // get the video id from the url of the current page
+            
         }
     }
-
+    
     videoElement.addEventListener('ended', playNextVideo); // Add event listener for when each video ends
-
+    
     // Find the insertion point for the video player in the DOM
     const secondaryInner = document.getElementById('secondary-inner');
     if (secondaryInner) {
@@ -1419,42 +1476,130 @@ function injectMultipleSignLanguageVideos() {
         console.error('Could not find the insertion point for the video.');
     }
 }
-
-function streamGlossData(videoID) {
-    const eventSource = new EventSource(`http://127.0.0.1:5000/url/${videoID}`);
-    eventSource.onmessage = function(event) {
-        const data = JSON.parse(event.data);
-        console.log("Received gloss data:", data);
-        displaySignVideo(data.gloss);
-    };
-}
-
-
-function displaySignVideo(gloss) {
-    const bslVideo = document.getElementById('bslVideo');
-    const glossWords = gloss.split(" ");
-    for (let word of glossWords) {
-        if (signVideosDictionary[word.toLowerCase()]) {
-            const newSrc = signVideosDictionary[word.toLowerCase()];
-            if (bslVideo.src !== newSrc) {
-                bslVideo.src = newSrc;
-                bslVideo.load(); // Important to load the new video
-                bslVideo.addEventListener('canplay', function onCanPlay() {
-                    bslVideo.play().catch(e => console.error(e));
-                    bslVideo.removeEventListener('canplay', onCanPlay); // Clean up
-                });
-            }
-            break; // Assuming you want to play the first matched word
+function injectWithTimeStamps(){
+    let videoQueue = {}; // Initialize an empty object for video queues
+    let currentQueue = []; // Current queue of videos to play
+    // lets get the gloss first
+    let videoID = window.location.href.split('v=')[1];
+    console.log("videoID: "+videoID);
+    fetch('http://localhost:8080/gloss/'+videoID)
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+    //     0: {start: 0, end: 6.797, gloss: 'HELLO EVERYONE WELCOME BACK CREATION H-O-L-I-C CHANNEL'}
+    //     1: {start: 7.995, end: 17.289, gloss: 'VIDEO I SHOW HOW FIX BROKEN ZIPPER LETS START'}
+    //     2: {start: 29.034, end: 32.934, gloss: 'WHERE YOU FROM'}
+    //     3: {start: 33.667, end: 38.967, gloss: 'WANT MAKE FRIENDS PEOPLE ALL WORLD'}
+        let queue = {};
+        for (const [index, value] of Object.entries(data)) {
+            // videoSources.push(value);
+            // console.log(`${index}: ${value}`);
+            let start = value.start;
+            let end = value.end;
+            let gloss = value.gloss.replaceAll("-", "");
+            const words = gloss.split(" ");
+            let videos = words.map(word => signVideosDictionary[word.toLowerCase()] || word);
+            for(let i=0; i<videos.length; i++){
+                if(videos[i] === words[i]){
+                    //finger spell the word
+                    const chars = videos[i].split("");
+                    videos[i] = chars.map(char => signVideosDictionary[char.toLowerCase()] || char);
+                }
+            } 
+            // Flatten the videos array to avoid nested arrays
+            videos = videos.flat();
+            queue[start] = videos;
+            // queue[start] = gloss;
         }
-    }
+        for(const item in queue){
+            console.log(item+" : "+queue[item]);
+        }
+    })
+    
+        // .then(response => response.json())
+        // .then(data => {
+        //     //create video frame where the video will be played
+        
+        
+        //     console.log(data);
+        //     let queue = {};
+        //     for (const [seconds, text] of Object.entries(data)) {
+        //         const words = text.split(" ");
+        //         let videos = words.map(word => signVideosDictionary[word.toLowerCase()] || word);
+        //         for(let i=0; i<videos.length; i++){
+        //             if(videos[i] === words[i]){
+        //                 //finger spell the word
+        //                 const chars = videos[i].split("");
+        //                 videos[i] = chars.map(char => signVideosDictionary[char.toLowerCase()] || char);
+        //             }
+        //         } 
+        //         // Flatten the videos array to avoid nested arrays
+        //         videos = videos.flat();
+        //         queue[seconds] = videos;
+        //     }
+        
+        //     console.log(queue);
+        //     /*
+        //         "0": "FIVE TECHNOLOGY MYTHS WRONG MORE SIGNAL BARS",
+        //         "2": "MORE BARS BETTER SERVICE",
+        //         "4": "PHONE SHOW HOW CLOSE"
+        //     */
+        //     /*
+        //     for (const [key, value] of Object.entries(data)) {
+        
+        //         console.log(`${key}: ${value}`);
+        
+        //         let time = parseInt(key);
+        //         let videos = [];
+        //         //break the value into words
+        //         let words = value.split(' ');
+        //         for(let i = 0; i < words.length; i++){
+        //             let word = words[i];
+        //             if(word in signVideosDictionary){
+        //                 videos.push(signVideosDictionary.key());
+        //             }
+        //         }
+        //     }
+        //     */
+        // })
+    
+    .catch(error => {
+        console.error('Error:', error);
+    });
+    
 }
 
 
 // Listen for the message from the background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "injectSignLanguage") {
-        injectMultipleSignLanguageVideos(); // Call the new function to inject the video player
-        console.log("Injected sign language player for video with ID: " + request.videoID);
-        streamGlossData(request.videoID);
+        //injectMultipleSignLanguageVideos(); // Call the function to inject the video player
+        // Pause the youtube video
+        const ytPlayer = document.querySelector('.html5-main-video');
+        ytPlayer.pause();
+        // set the youtube video to the beginning
+        ytPlayer.currentTime = 0;
+        // set the youtube video speed to 0.5
+        ytPlayer.playbackRate = 0.5;
+        
+        const videoElement = document.createElement('video');
+        videoElement.id = 'bslVideo';
+        videoElement.muted = true; // Mute the video
+        videoElement.controls = true; // Hide browser controls
+        videoElement.autoplay = true;
+        videoElement.width = 640;
+        videoElement.height = 360;
+        // Find the insertion point for the video player in the DOM
+        const secondaryInner = document.getElementById('secondary-inner');
+        if (secondaryInner) {
+            secondaryInner.insertBefore(videoElement, secondaryInner.firstChild);
+            //playNextVideo(); // Start playing the first video immediately after insertion
+            
+            let bslVideo = document.getElementById('bslVideo'); 
+            //continuousSynchronization(bslVideo);
+        } else {
+            console.error('Could not find the insertion point for the video.');
+        }
+        injectWithTimeStamps();
     }
 });
