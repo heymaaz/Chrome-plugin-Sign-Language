@@ -1492,8 +1492,6 @@ function injectWithTimeStamps(){
     //     3: {start: 33.667, end: 38.967, gloss: 'WANT MAKE FRIENDS PEOPLE ALL WORLD'}
         let queue = {};
         for (const [index, value] of Object.entries(data)) {
-            // videoSources.push(value);
-            // console.log(`${index}: ${value}`);
             let start = value.start;
             let end = value.end;
             let gloss = value.gloss.replaceAll("-", "");
@@ -1509,60 +1507,82 @@ function injectWithTimeStamps(){
             // Flatten the videos array to avoid nested arrays
             videos = videos.flat();
             queue[start] = videos;
-            // queue[start] = gloss;
         }
-        for(const item in queue){
-            console.log(item+" : "+queue[item]);
-        }
+        // for(const item in queue){
+        //     console.log(item+" : "+queue[item]);
+        // }
+         console.log(queue);
+        // got the queue now lets play the videos
+        currentQueue = queue[0];
+        // get the video player
+        const bslVideo = document.getElementById('bslVideo');
+        
+        // to play in sync with the youtube video we need to check the time of the youtube video
+        // and play the videos accordingly
+        let lastState = null; // Store the last known state
+        let lastTime = 0;
+        let lastVideoIndex = 0;
+        const checkState = () => {
+            // Find the YouTube video player
+            const ytPlayer = document.querySelector('.html5-main-video');
+            
+            if (ytPlayer) {
+                const isPlaying = !ytPlayer.paused;// Check if the video is playing
+                //Log the time of the video
+                let currentTime = ytPlayer.currentTime;
+                if(currentTime !== lastTime){
+                    lastTime = currentTime;
+                    //if(currentTime in queue){
+                    // cannot use currentTime as key because it is a float we just need the closest key less than currentTime
+                    let keys = Object.keys(queue);
+                    // let closest = keys.reduce((a, b) => {
+                    //     return Math.abs(b - currentTime) < Math.abs(a - currentTime) ? b : a;
+                    // });
+                    let closest = keys.reduce((a, b) => {
+                        // 'a' is the accumulator, it starts as undefined or can be set to a minimum value
+                        if (b < currentTime && (a === undefined || b > a)) {
+                            return b; // return the larger key if it's smaller than currentTime
+                        }
+                        return a; // return the current accumulator if no larger, valid key is found
+                    }, undefined);
+                    if(closest in queue && queue[closest] !== currentQueue){
+                        console.log("Queue switched to index "+closest);
+                        currentQueue = queue[closest];
+                        lastVideoIndex = 0;
+                    }
+                }
+                //if (isPlaying !== lastState) {
+                    if (isPlaying) {
+                        if(lastVideoIndex < currentQueue.length){
+                            bslVideo.src = currentQueue[lastVideoIndex];
+                            console.log("Playing: "+currentQueue[lastVideoIndex]);
+                            bslVideo.play().catch(e => console.error(e));
+                             bslVideo.addEventListener('ended', function(){
+                                 lastVideoIndex++;
+                            //     if(lastVideoIndex < currentQueue.length){
+                            //         bslVideo.src = currentQueue[lastVideoIndex];
+                            //         bslVideo.play().catch(e => console.error(e));
+                            //     }
+                            });
+
+                            //lastVideoIndex++;
+                        }
+                        else {
+                            bslVideo.pause();//pause the video till the next queue
+                        }
+                    } 
+                    else {
+                        bslVideo.pause();//pause the video as the youtube video is paused
+                    }
+                    //lastState = isPlaying; // Update last known state
+                //}
+            }
+        };
+
+        // Start the loop
+        setInterval(checkState, 2000); // Run the checkState function every second
+        
     })
-    
-        // .then(response => response.json())
-        // .then(data => {
-        //     //create video frame where the video will be played
-        
-        
-        //     console.log(data);
-        //     let queue = {};
-        //     for (const [seconds, text] of Object.entries(data)) {
-        //         const words = text.split(" ");
-        //         let videos = words.map(word => signVideosDictionary[word.toLowerCase()] || word);
-        //         for(let i=0; i<videos.length; i++){
-        //             if(videos[i] === words[i]){
-        //                 //finger spell the word
-        //                 const chars = videos[i].split("");
-        //                 videos[i] = chars.map(char => signVideosDictionary[char.toLowerCase()] || char);
-        //             }
-        //         } 
-        //         // Flatten the videos array to avoid nested arrays
-        //         videos = videos.flat();
-        //         queue[seconds] = videos;
-        //     }
-        
-        //     console.log(queue);
-        //     /*
-        //         "0": "FIVE TECHNOLOGY MYTHS WRONG MORE SIGNAL BARS",
-        //         "2": "MORE BARS BETTER SERVICE",
-        //         "4": "PHONE SHOW HOW CLOSE"
-        //     */
-        //     /*
-        //     for (const [key, value] of Object.entries(data)) {
-        
-        //         console.log(`${key}: ${value}`);
-        
-        //         let time = parseInt(key);
-        //         let videos = [];
-        //         //break the value into words
-        //         let words = value.split(' ');
-        //         for(let i = 0; i < words.length; i++){
-        //             let word = words[i];
-        //             if(word in signVideosDictionary){
-        //                 videos.push(signVideosDictionary.key());
-        //             }
-        //         }
-        //     }
-        //     */
-        // })
-    
     .catch(error => {
         console.error('Error:', error);
     });
