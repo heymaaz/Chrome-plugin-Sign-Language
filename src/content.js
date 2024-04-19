@@ -1477,24 +1477,19 @@ function injectMultipleSignLanguageVideos() {
     }
 }
 function injectWithTimeStamps(){
-    let videoQueue = {}; // Initialize an empty object for video queues
-    let currentQueue = []; // Current queue of videos to play
-    // lets get the gloss first
+    let videoQueue = {};
+    let currentQueue = [];
     let videoID = window.location.href.split('v=')[1];
     console.log("videoID: "+videoID);
+
     fetch('http://localhost:8080/gloss/'+videoID)
     .then(response => response.json())
     .then(data => {
-        console.log(data);
-    //     0: {start: 0, end: 6.797, gloss: 'HELLO EVERYONE WELCOME BACK CREATION H-O-L-I-C CHANNEL'}
-    //     1: {start: 7.995, end: 17.289, gloss: 'VIDEO I SHOW HOW FIX BROKEN ZIPPER LETS START'}
-    //     2: {start: 29.034, end: 32.934, gloss: 'WHERE YOU FROM'}
-    //     3: {start: 33.667, end: 38.967, gloss: 'WANT MAKE FRIENDS PEOPLE ALL WORLD'}
         let queue = {};
-        for (const [index, value] of Object.entries(data)) {
-            let start = value.start;
-            let end = value.end;
-            let gloss = value.gloss.replaceAll("-", "");
+        data.forEach(item => {
+            let start = item.start;
+            let end = item.end;
+            let gloss = item.gloss.replaceAll("-", "");
             const words = gloss.split(" ");
             let videos = words.map(word => signVideosDictionary[word.toLowerCase()] || word);
             for(let i=0; i<videos.length; i++){
@@ -1503,90 +1498,67 @@ function injectWithTimeStamps(){
                     const chars = videos[i].split("");
                     videos[i] = chars.map(char => signVideosDictionary[char.toLowerCase()] || char);
                 }
-            } 
-            // Flatten the videos array to avoid nested arrays
-            videos = videos.flat();
+            }
+            videos = videos.flat(); // Flatten in case of arrays from dictionary lookups
             queue[start] = videos;
-        }
-        // for(const item in queue){
-        //     console.log(item+" : "+queue[item]);
-        // }
-         console.log(queue);
-        // got the queue now lets play the videos
-        currentQueue = queue[0];
-        // get the video player
+        });
+
+        console.log(queue);
+
         const bslVideo = document.getElementById('bslVideo');
-        
-        // to play in sync with the youtube video we need to check the time of the youtube video
-        // and play the videos accordingly
-        let lastState = null; // Store the last known state
+        const ytPlayer = document.querySelector('.html5-main-video');
+        //play the youtube video at 0.5 speed
+        ytPlayer.playbackRate = 0.5;
+
+        let lastState = null;
         let lastTime = 0;
         let lastVideoIndex = 0;
+        let isVideoPlaying = false;
+
         const checkState = () => {
-            // Find the YouTube video player
-            const ytPlayer = document.querySelector('.html5-main-video');
-            
             if (ytPlayer) {
-                const isPlaying = !ytPlayer.paused;// Check if the video is playing
-                //Log the time of the video
+                const isPlaying = !ytPlayer.paused;
                 let currentTime = ytPlayer.currentTime;
                 if(currentTime !== lastTime){
                     lastTime = currentTime;
-                    //if(currentTime in queue){
-                    // cannot use currentTime as key because it is a float we just need the closest key less than currentTime
-                    let keys = Object.keys(queue);
-                    // let closest = keys.reduce((a, b) => {
-                    //     return Math.abs(b - currentTime) < Math.abs(a - currentTime) ? b : a;
-                    // });
+                    let keys = Object.keys(queue).map(time => parseFloat(time));
                     let closest = keys.reduce((a, b) => {
-                        // 'a' is the accumulator, it starts as undefined or can be set to a minimum value
-                        if (b < currentTime && (a === undefined || b > a)) {
-                            return b; // return the larger key if it's smaller than currentTime
-                        }
-                        return a; // return the current accumulator if no larger, valid key is found
+                        return (b < currentTime && (a === undefined || b > a)) ? b : a;
                     }, undefined);
-                    if(closest in queue && queue[closest] !== currentQueue){
+                    
+                    if(typeof closest !== 'undefined' && queue[closest] !== currentQueue){
                         console.log("Queue switched to index "+closest);
                         currentQueue = queue[closest];
                         lastVideoIndex = 0;
+                        isVideoPlaying = false; // Reset play state
                     }
                 }
-                //if (isPlaying !== lastState) {
-                    if (isPlaying) {
-                        if(lastVideoIndex < currentQueue.length){
-                            bslVideo.src = currentQueue[lastVideoIndex];
-                            console.log("Playing: "+currentQueue[lastVideoIndex]);
-                            bslVideo.play().catch(e => console.error(e));
-                             bslVideo.addEventListener('ended', function(){
-                                 lastVideoIndex++;
-                            //     if(lastVideoIndex < currentQueue.length){
-                            //         bslVideo.src = currentQueue[lastVideoIndex];
-                            //         bslVideo.play().catch(e => console.error(e));
-                            //     }
-                            });
 
-                            //lastVideoIndex++;
-                        }
-                        else {
-                            bslVideo.pause();//pause the video till the next queue
-                        }
-                    } 
-                    else {
-                        bslVideo.pause();//pause the video as the youtube video is paused
+                if (isPlaying) {
+                    if(!isVideoPlaying && lastVideoIndex < currentQueue.length){
+                        bslVideo.src = currentQueue[lastVideoIndex];
+                        console.log("Playing: "+currentQueue[lastVideoIndex]);
+                        bslVideo.play().then(() => {
+                            isVideoPlaying = true; // Set playing flag
+                        }).catch(e => console.error(e));
+
+                        bslVideo.onended = () => {
+                            lastVideoIndex++;
+                            isVideoPlaying = false; // Reset play state
+                        };
                     }
-                    //lastState = isPlaying; // Update last known state
-                //}
+                } else {
+                    bslVideo.pause();
+                    isVideoPlaying = false;
+                }
             }
         };
 
-        // Start the loop
-        setInterval(checkState, 2000); // Run the checkState function every second
-        
+        setInterval(checkState, 200);
     })
     .catch(error => {
         console.error('Error:', error);
     });
-    
 }
 
 
