@@ -625,6 +625,27 @@ const signVideosDictionary = {
     "x": "https://media.signbsl.com/videos/bsl/signstation/x.mp4",
     "y": "https://media.signbsl.com/videos/bsl/signstation/Y.mp4",
     "z": "https://media.signbsl.com/videos/bsl/signstation/Z.mp4",
+    "0": "https://media.signbsl.com/videos/bsl/signstation/zero.mp4",
+    "1": "https://media.signbsl.com/videos/bsl/signstation/1.mp4",
+    "2": "https://media.signbsl.com/videos/bsl/signstation/2.mp4",
+    "3": "https://media.signbsl.com/videos/bsl/signstation/3.mp4",
+    "4": "https://media.signbsl.com/videos/bsl/signstation/4.mp4",
+    "5": "https://media.signbsl.com/videos/bsl/signstation/5.mp4",
+    "6": "https://media.signbsl.com/videos/bsl/signstation/6.mp4",
+    "7": "https://media.signbsl.com/videos/bsl/signstation/7.mp4",
+    "8": "https://media.signbsl.com/videos/bsl/signstation/8.mp4",
+    "9": "https://media.signbsl.com/videos/bsl/signstation/9.mp4",
+    "10": "https://media.signbsl.com/videos/bsl/signstation/10.mp4",
+    "11": "https://media.signbsl.com/videos/bsl/signstation/11.mp4",
+    "12": "https://media.signbsl.com/videos/bsl/signstation/12.mp4",
+    "13": "https://media.signbsl.com/videos/bsl/signstation/13.mp4",
+    "14": "https://media.signbsl.com/videos/bsl/signstation/14.mp4",
+    "15": "https://media.signbsl.com/videos/bsl/signstation/15.mp4",
+    "16": "https://media.signbsl.com/videos/bsl/signstation/16.mp4",
+    "17": "https://media.signbsl.com/videos/bsl/signstation/17.mp4",
+    "18": "https://media.signbsl.com/videos/bsl/signstation/18.mp4",
+    "19": "https://media.signbsl.com/videos/bsl/signstation/19.mp4",
+    "20": "https://media.signbsl.com/videos/bsl/signstation/20.mp4",
     "21": "https://media.signbsl.com/videos/bsl/signstation/21.mp4",
     "22": "https://media.signbsl.com/videos/bsl/signstation/22.mp4",
     "23": "https://media.signbsl.com/videos/bsl/signstation/23.mp4",
@@ -634,6 +655,7 @@ const signVideosDictionary = {
     "27": "https://media.signbsl.com/videos/bsl/signstation/27.mp4",
     "28": "https://media.signbsl.com/videos/bsl/signstation/28.mp4",
     "29": "https://media.signbsl.com/videos/bsl/signstation/29.mp4",
+    "30": "https://media.signbsl.com/videos/bsl/signstation/30.mp4",
     "31": "https://media.signbsl.com/videos/bsl/signstation/31.mp4",
     "32": "https://media.signbsl.com/videos/bsl/signstation/32.mp4",
     "33": "https://media.signbsl.com/videos/bsl/signstation/33.mp4",
@@ -1237,7 +1259,6 @@ const signVideosDictionary = {
     "dictionary": "https://media.signbsl.com/videos/bsl/signstation/dictionary.mp4",
     "i-love-you": "https://media.signbsl.com/videos/bsl/uploads/mp4/kerrisims-i-love-you.mp4",
     "ancient": "https://media.signbsl.com/videos/bsl/signstation/ancient.mp4",
-    "13": "https://media.signbsl.com/videos/bsl/signstation/13.mp4",
     "start": "https://media.signbsl.com/videos/bsl/signstation/get.mp4",
     "silk": "https://media.signbsl.com/videos/bsl/signstation/silk.mp4",
     "head": "https://media.signbsl.com/videos/bsl/signstation/mind.mp4",
@@ -1277,8 +1298,6 @@ const signVideosDictionary = {
     "open": "https://media.signbsl.com/videos/bsl/signstation/open.mp4",
     "working": "https://media.signbsl.com/videos/bsl/signstation/working.mp4",
     "told": "https://media.signbsl.com/videos/bsl/signstation/told.mp4",
-    "1": "https://media.signbsl.com/videos/bsl/signstation/one.mp4",
-    "30": "https://media.signbsl.com/videos/bsl/signstation/30.mp4",
     "quiet": "https://media.signbsl.com/videos/bsl/signstation/quiet.mp4",
     "busy": "https://media.signbsl.com/videos/bsl/signstation/busy.mp4",
     "huge": "https://media.signbsl.com/videos/bsl/signstation/huge.mp4",
@@ -1476,20 +1495,109 @@ function injectMultipleSignLanguageVideos() {
         console.error('Could not find the insertion point for the video.');
     }
 }
+function createLoader() {
+    if (document.getElementById('loader')) return; // Prevent multiple loaders
+    
+    // Create loader element
+    const loader = document.createElement('div');
+    loader.id = 'loader';
+
+    // Create loading circle
+    const loaderCircle = document.createElement('div');
+    loaderCircle.className = 'loaderCircle';
+
+    // Append loading circle to the loader
+    loader.appendChild(loaderCircle);
+    const css = `
+    .loader {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.75);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;  
+        color: white;
+    }
+    .loaderCircle {
+        border: 10px solid #fc0808;
+        border-top: 10px solid #f3f3f3;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin .8s linear infinite;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    `;
+    const head = document.head || document.getElementsByTagName('head')[0];
+    const style = document.createElement('style');
+    style.appendChild(document.createTextNode(css));
+    head.appendChild(style);
+
+    // Append loader to the body
+    document.body.appendChild(loader);
+}
+
+
+function showLoader() {
+    const loader = document.getElementById('loader');
+    if (loader) {
+        loader.style.display = 'flex';  // Use flex to center the spinner
+        document.body.style.pointerEvents = 'none';  // Disable interaction with underlying elements
+    }
+}
+
+function hideLoader() {
+    const loader = document.getElementById('loader');
+    if (loader) {
+        loader.style.display = 'none';
+        document.body.style.pointerEvents = 'auto';  // Re-enable interaction with underlying elements
+    }
+}
+
 function injectWithTimeStamps(){
     let videoQueue = {};
     let currentQueue = [];
     let videoID = window.location.href.split('v=')[1];
     console.log("videoID: "+videoID);
+    
+    // Show loader before fetching
+    showLoader();
 
     fetch('http://localhost:8080/gloss/'+videoID)
-    .then(response => response.json())
+    .then(response => {
+        console.log("HTTP Status Code:", response.status); // Log the status code
+        if (!response.ok||response.status !== 200) {
+            // Even if the response is not ok, parse the JSON to get the error message
+            return response.json().then(err => {
+                // After parsing the JSON, throw an error with the message from the backend
+                throw new Error(err.error || 'Unknown error');
+            });
+        }
+        return response.json();
+    })
     .then(data => {
+        if (!Array.isArray(data)) {
+            // If data is not an array, log the error and possibly throw or handle it differently
+            console.error('Expected an array of glosses, but got:', data);
+            throw new Error('Invalid data format received');
+        }
         let queue = {};
         data.forEach(item => {
             let start = item.start;
             let end = item.end;
-            let gloss = item.gloss.replaceAll("-", "");
+            //let gloss = item.gloss.replaceAll("-", "");
+            let gloss = item.gloss.replaceAll(/[^a-zA-Z0-9 ]/g, "");
             const words = gloss.split(" ");
             let videos = words.map(word => signVideosDictionary[word.toLowerCase()] || word);
             for(let i=0; i<videos.length; i++){
@@ -1507,8 +1615,6 @@ function injectWithTimeStamps(){
 
         const bslVideo = document.getElementById('bslVideo');
         const ytPlayer = document.querySelector('.html5-main-video');
-        //play the youtube video at 0.5 speed
-        ytPlayer.playbackRate = 0.5;
 
         let lastState = null;
         let lastTime = 0;
@@ -1553,11 +1659,22 @@ function injectWithTimeStamps(){
                 }
             }
         };
-
+        hideLoader();
+        //play the youtube video
+        ytPlayer.play();
         setInterval(checkState, 200);
     })
     .catch(error => {
         console.error('Error:', error);
+        // Hide loader even if fetch fails
+        hideLoader();
+        // Alert the user with the error message from the backend
+        alert('Error: ' + error.message);
+        // Remove the video player
+        const bslVideo = document.getElementById('bslVideo');
+        if (bslVideo) {
+            bslVideo.remove();
+        }
     });
 }
 
@@ -1565,15 +1682,19 @@ function injectWithTimeStamps(){
 // Listen for the message from the background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "injectSignLanguage") {
+        createLoader();
         //injectMultipleSignLanguageVideos(); // Call the function to inject the video player
         // Pause the youtube video
         const ytPlayer = document.querySelector('.html5-main-video');
         ytPlayer.pause();
         // set the youtube video to the beginning
         ytPlayer.currentTime = 0;
-        // set the youtube video speed to 0.5
+        // set the youtube video speed to 0.5x
         ytPlayer.playbackRate = 0.5;
         
+        // set the browser zoom to 75%
+        document.body.style.zoom = "75%";
+
         const videoElement = document.createElement('video');
         videoElement.id = 'bslVideo';
         videoElement.muted = true; // Mute the video
