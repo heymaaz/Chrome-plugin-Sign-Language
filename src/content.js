@@ -1382,119 +1382,6 @@ const signVideosDictionary = {
     "engineer": "https://media.signbsl.com/videos/bsl/BenFletcherTechSigns/mp4/engineer.mp4"
 };
 
-// Synchronize play/pause with YouTube player function
-function continuousSynchronization(bslVideo) {
-    let lastState = null; // Store the last known state
-    
-    const checkState = () => {
-        // Find the YouTube video player
-        const ytPlayer = document.querySelector('.html5-main-video');
-        
-        if (ytPlayer) {
-            const isPlaying = !ytPlayer.paused;// Check if the video is playing
-            //Log the time of the video
-            console.log(ytPlayer.currentTime);
-            
-            // Check if the state has changed since last check
-            if (isPlaying !== lastState) {
-                if (isPlaying) {
-                    bslVideo.play();
-                } else {
-                    bslVideo.pause();
-                }
-                lastState = isPlaying; // Update last known state
-            }
-        }
-    };
-    
-    // Check every 500 milliseconds. if the state has changed
-    setInterval(checkState, 500);
-}
-
-
-// New function to inject the video player with multiple video sources
-function injectMultipleSignLanguageVideos() {
-    // Array of video sources
-    const videoSources = [
-        "https://media.signbsl.com/videos/bsl/signstation/ME.mp4",
-        "https://media.signbsl.com/videos/bsl/gpnhs/mp4/professor.mp4",
-        "https://media.signbsl.com/videos/bsl/signstation/your.mp4",
-        "https://media.signbsl.com/videos/bsl/signstation/computer.mp4",
-        "https://media.signbsl.com/videos/bsl/signstation/science.mp4"
-        // Add more video URLs here
-    ];
-    
-    
-    //Fetch the videos from the server
-    // fetch the data from the server
-    // Example payload:
-    /*
-    {
-        "00:00:00.000": "FIVE TECHNOLOGY MYTHS WRONG MORE SIGNAL BARS",
-        "00:00:02.940": "MORE BARS BETTER SERVICE",
-        "00:00:04.920": "PHONE SHOW HOW CLOSE",
-        "00:00:06.600": "CELL-TOWER NEAR NOT",
-        "00:00:08.580": "SPEED FULL SIGNAL STILL FEEL SLOW",
-        "00:00:10.740": "IF NETWORK BUSY AIRPLANE MODE",
-        "00:00:12.660": "CHARGE PHONE FAST TECHNICALLY"
-    }
-    */
-    //let videoSources = [];
-    let videoID = window.location.href.split('v=')[1];
-    fetch('http://127.0.0.1:5000/url/'+videoID)
-    .then(response => response.json())
-    .then(data => {
-        console.log(data);
-        
-        for (const [key, value] of Object.entries(data)) {
-            //videoSources.push(value);
-            console.log(`${key}: ${value}`);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-    
-    let currentVideoIndex = 0; // Index to track the current video
-    
-    // Create video element
-    const videoElement = document.createElement('video');
-    videoElement.id = 'bslVideo';
-    videoElement.muted = true; // Mute the video
-    videoElement.controls = true; // Hide browser controls
-    videoElement.autoplay = true;
-    videoElement.width = 640;
-    videoElement.height = 360;
-    
-    // Function to play the next video
-    function playNextVideo() {
-        if (currentVideoIndex < videoSources.length) {
-            videoElement.src = videoSources[currentVideoIndex];
-            videoElement.play().catch(e => console.error(e));
-            currentVideoIndex++;
-        } else {
-            console.log('All videos played.');
-            //https://www.youtube.com/watch?v=THw-wXt7wyM
-            //video id: THw-wXt7wyM
-            // get the video id from the url of the current page
-            
-        }
-    }
-    
-    videoElement.addEventListener('ended', playNextVideo); // Add event listener for when each video ends
-    
-    // Find the insertion point for the video player in the DOM
-    const secondaryInner = document.getElementById('secondary-inner');
-    if (secondaryInner) {
-        secondaryInner.insertBefore(videoElement, secondaryInner.firstChild);
-        playNextVideo(); // Start playing the first video immediately after insertion
-        
-        let bslVideo = document.getElementById('bslVideo'); 
-        continuousSynchronization(bslVideo);
-    } else {
-        console.error('Could not find the insertion point for the video.');
-    }
-}
 function createLoader() {
     if (document.getElementById('loader')) return; // Prevent multiple loaders
     
@@ -1686,7 +1573,6 @@ function injectWithTimeStamps(){
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "injectSignLanguage") {
         createLoader();
-        //injectMultipleSignLanguageVideos(); // Call the function to inject the video player
         // Pause the youtube video
         const ytPlayer = document.querySelector('.html5-main-video');
         ytPlayer.pause();
@@ -1709,10 +1595,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         const secondaryInner = document.getElementById('secondary-inner');
         if (secondaryInner) {
             secondaryInner.insertBefore(videoElement, secondaryInner.firstChild);
-            //playNextVideo(); // Start playing the first video immediately after insertion
-            
             let bslVideo = document.getElementById('bslVideo'); 
-            //continuousSynchronization(bslVideo);
         } else {
             console.error('Could not find the insertion point for the video.');
         }
