@@ -1614,6 +1614,7 @@ function injectWithTimeStamps(){
         console.log(queue);
 
         const bslVideo = document.getElementById('bslVideo');
+        
         const ytPlayer = document.querySelector('.html5-main-video');
 
         let lastState = null;
@@ -1646,6 +1647,8 @@ function injectWithTimeStamps(){
                         console.log("Playing: "+currentQueue[lastVideoIndex]);
                         bslVideo.play().then(() => {
                             isVideoPlaying = true; // Set playing flag
+                            // Set the playback speed of the BSL video to 6x
+                            bslVideo.playbackRate = 6;
                         }).catch(e => console.error(e));
 
                         bslVideo.onended = () => {
